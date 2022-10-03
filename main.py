@@ -19,7 +19,7 @@ fig = px.scatter(
     df,
     x="budget",
     y="gross",
-    size="content_rating",
+    # size="content_rating",
     # color="language",
     # hover_name="country",
     log_x=True,
@@ -33,4 +33,6 @@ dcc.Graph(id="budget_vs_gross", figure=fig)])
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(host="0.0.0.0", port=8050, debug=True)
+
+
