@@ -4,7 +4,7 @@ CSC302 Project
 ### Documentation
 see Documentation.pdf
 ### Meeting Notes
-see Meething notes folder
+see Meeting-Minutes folder
 
 ### How to Run
 
