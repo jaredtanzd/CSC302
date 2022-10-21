@@ -49,7 +49,7 @@ spent on developing the project instead of learning a new software.
 
 ###  6. Preliminary project development plan and milestones.
 
-We discussed and broke down the milestones and development plan of our project. In Weeks 3-4, we have to streamline the goal of our project, find a reliable dataset which fulfills the requirements of this goal, complete initial data cleaning and visualization to understand the dataset we are working with. Lastly, we will have to push a toy (preliminary) application that is functional and fulfills the requirements stated by Mike Containerize it and ensure it works on all devices.
+We discussed and broke down the milestones and development plan of our project. In Weeks 3-4, we have to streamline the goal of our project, find a reliable dataset which fulfills the requirements of this goal, complete initial data cleaning and visualization to understand the dataset we are working with. Lastly, we will have to push a toy (preliminary) application that is functional and fulfills the requirements stated by Mike. Containerize it and ensure it works on all devices.
 
 
 Weeks 5-7, we have to dive deeper into creating a prediction model for the

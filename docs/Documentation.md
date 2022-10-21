@@ -46,7 +46,7 @@ running the software will run.
 * Docker containers are process-isolated and don’t require a hardware hypervisor
 hence it requires less resources than a virtual machine and runs faster.
     
-### 3.The Dataset and Problem
+### 3. The Dataset and Problem
 
 Every year, thousands of movies are filmed and produced but not all of them breakeven.
 An even lesser number of movies make it as a “box-office hit”. In this project, we intend
