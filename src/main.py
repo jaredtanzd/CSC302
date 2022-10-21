@@ -133,14 +133,101 @@ numerical = [c for c in df.columns if df[c].dtype.name != 'category']
 numerical_df = df[numerical]
 categorical_df = df[categorical]
 
+# ML model
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import RobustScaler
+import math
+from collections import Counter
+
+def dimsReduction(column, threshold=0.70, return_categories_list=True):
+  #Find the threshold value using the percentage and number of instances in the column
+  threshold_value=int(threshold*len(column))
+  #Initialise an empty list for our new minimised categories
+  categories_list=[]
+  #Initialise a variable to calculate the sum of frequencies
+  s=0
+  #Create a counter dictionary of the form unique_value: frequency
+  counts=Counter(column)
+
+  #Loop through the category name and its corresponding frequency after sorting the categories by descending order of frequency
+  for i,j in counts.most_common():
+    #Add the frequency to the global sum
+    s+=dict(counts)[i]
+    #Append the category name to the list
+    categories_list.append(i)
+    #Check if the global sum has reached the threshold value, if so break the loop
+    if s>=threshold_value:
+      break
+    
+  #Append the category Other to the list
+  categories_list.append('Other')
+
+  #Replace all instances not in our new categories by Other  
+  new_column = column.apply(lambda x: x if x in categories_list else 'Other')
+
+  #Return transformed column and unique values if return_categories=True
+  if(return_categories_list):
+    return pd.Series(new_column), categories_list
+  #Return only the transformed column if return_categories=False
+  else:
+    return pd.Series(new_column)
+
+for var in df[list(set(categorical) - set(genres))]:
+    _ , cat_list = dimsReduction(df[var], return_categories_list=True)
+
+for var in df[list(set(categorical) - set(genres))]:
+    if var == 'main_keyword':
+        df[var], cat_list =  dimsReduction(df[var], threshold=0.2)
+    # since color only has 2 unique features, we set the threshold to 100% to capture the other feature
+    elif var == 'color': 
+        df[var], cat_list = dimsReduction(df[var], threshold=1)
+    else:
+        df[var], cat_list = dimsReduction(df[var])
+
+ohe_columns =  list(set(categorical) - set(genres))
+ohe_df =  pd.get_dummies(df[ohe_columns])
+
+df_merged = pd.concat([df, ohe_df], axis=1)
+df_merged = df_merged.drop(ohe_columns, axis=1)
+df_merged = df_merged.astype('float64')
+
+# X -> Numerical predictors 
+# y -> gross, numerical response 
+X, y = df_merged[numerical].loc[:, df_merged[numerical].columns != 'gross'], df_merged['gross']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=13)
+
+# Fitting the robust scaler transform on the train set
+rs1 = RobustScaler().fit(X_train)
+rs2 = RobustScaler().fit(y_train.values.reshape(-1,1))
+
+# Transforming both train and test sets
+X_train = pd.DataFrame(rs1.transform(X_train.values), index=X_train.index, columns=X_train.columns)
+y_train = pd.DataFrame(rs2.transform(y_train.values.reshape(-1,1)), index=y_train.index, columns=['gross'])
+
+X_test = pd.DataFrame(rs1.transform(X_test), index=X_test.index, columns=X_test.columns)
+y_test = pd.DataFrame(rs2.transform(y_test.values.reshape(-1,1)), index=y_test.index, columns=['gross'])
+cat_tomerge = df_merged[df_merged.columns[~df_merged.columns.isin(numerical)]]
+
+X_train = pd.merge(X_train, cat_tomerge, left_index=True, right_index=True)
+X_test = pd.merge(X_test, cat_tomerge, left_index=True, right_index=True)
+
+gbr_rmse = []
+
+# Gradient Boosting Regressor model
+model = GradientBoostingRegressor(random_state=0)
+model.fit(X_train.values, y_train.values)
+
+# Predict Gross from our predictor features
+y_train_pred = model.predict(X_train.values)
+y_test_pred = model.predict(X_test.values)
 
 
 
 
 
-
-
-fig = px.scatter(
+fig_main = px.scatter(
     df,
     x="budget",
     y="gross",
@@ -151,11 +238,20 @@ fig = px.scatter(
     size_max=60
 )
 
+fig_ML = px.scatter(
+    x=np.array(y_train['gross']),
+    y=np.array(y_train_pred)
+)
+
 app.layout = html.Div(children=[
     html.H1(children='Movies Data Dashboard', style={'text-align' : 'center', 'font-family':'verdana'}),
-    dcc.Graph(id="budget_vs_gross", figure=fig)
+    
+    html.H4(children='Budget vs Gross', style={'text-align' : 'center', 'font-family':'verdana'}),
+    dcc.Graph(id='budget_vs_gross', figure=fig_main),
+    
+    html.H4(children='Gradient Boosting ML Model Results', style={'text-align' : 'center', 'font-family':'verdana'}),
+    dcc.Graph(id='ML_model', figure=fig_ML)
     ])
-
 
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0", port=8050, debug=True)
