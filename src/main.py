@@ -223,8 +223,16 @@ model.fit(X_train.values, y_train.values)
 y_train_pred = model.predict(X_train.values)
 y_test_pred = model.predict(X_test.values)
 
+train_rmse = math.sqrt(mean_squared_error(y_train.values, y_train_pred))
+train_r2 = model.score(X_train.values, y_train.values)
+test_rmse = math.sqrt(mean_squared_error(y_test.values, y_test_pred))
+test_r2 = model.score(X_test.values, y_test.values)
 
 
+plot_df_train = pd.concat([y_train, pd.DataFrame(y_train_pred).set_index(y_train.index)], axis=1)
+plot_df_test = pd.concat([y_test, pd.DataFrame(y_test_pred).set_index(y_test.index)], axis=1)
+plot_df_train.columns = ['Gross Actual (Train)', 'Gross Predicted (Train)']
+plot_df_test.columns = ['Gross Actual (Test)', 'Gross Predicted (Test)']
 
 
 fig_main = px.scatter(
@@ -234,24 +242,48 @@ fig_main = px.scatter(
     size="num_voted_users",
     color="content_rating",
     hover_name="movie_title",
-    log_x=True,
-    size_max=60
+    log_x=True
 )
 
-fig_ML = px.scatter(
-    x=np.array(y_train['gross']),
-    y=np.array(y_train_pred)
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+fig_train = px.scatter(
+    plot_df_train,
+    x='Gross Actual (Train)',
+    y='Gross Predicted (Train)',
+    trendline='ols',
+    trendline_color_override="red",
 )
+
+fig_test = px.scatter(
+    plot_df_test,
+    x='Gross Actual (Test)',
+    y='Gross Predicted (Test)',
+    trendline='ols',
+    trendline_color_override="red"
+)
+
 
 app.layout = html.Div(children=[
     html.H1(children='Movies Data Dashboard', style={'text-align' : 'center', 'font-family':'verdana'}),
     
-    html.H4(children='Budget vs Gross', style={'text-align' : 'center', 'font-family':'verdana'}),
-    dcc.Graph(id='budget_vs_gross', figure=fig_main),
+    html.H3(children='Budget vs Gross', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.Center(children=[
+        dcc.Graph(id='budget_vs_gross', figure=fig_main, style={'display': 'inline-block', 'height':'80%','width':'80%'})],
+        style={'textAlign' : 'center'}),
     
-    html.H4(children='Gradient Boosting ML Model Results', style={'text-align' : 'center', 'font-family':'verdana'}),
-    dcc.Graph(id='ML_model', figure=fig_ML)
-    ])
+    html.H3(children='Machine Learning Model Results', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.Center(children=[dcc.Graph(id="train", style={'display': 'inline-block'}, figure=fig_train),
+        dcc.Graph(id="test", style={'display': 'inline-block'}, figure=fig_test)],
+        style={'textAlign' : 'center'}),
+
+    html.H4(children='Gradient Boosting Results', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.P(f'Train Set Explained Variance  : {train_r2}', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.P(f'Train Set RMSE                : {train_rmse}', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.P(f'Test Set Explained Variance   : {test_r2}', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.P(f'Test Set RMSE                 : {test_rmse}', style={'text-align' : 'center', 'font-family':'verdana'})
+])
 
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0", port=8050, debug=True)
