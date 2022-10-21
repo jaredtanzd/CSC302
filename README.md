@@ -1,12 +1,22 @@
 # CSC302
 CSC302 Project 
 
-### Documentation
-see Documentation.pdf
-### Meeting Notes
-see Meeting-Minutes folder
+## Top-level directory layout
 
-### How to Run
+```
+    .
+    ├── .github/workflows           # Github action files
+    ├── docs                        # Documentation files
+    ├── src                         # Python source files
+    └── README.md
+```
+### Key Links:
+- **[Documentation](docs/Documentation.md)**
+- **[Roadmap](docs/Roadmap/)**
+- **[Collected Meeting Notes Folder](docs/Meeting-Notes/)**
+
+
+## How to Run
 
 1. Install docker from https://docs.docker.com/get-docker/
 2. Verify docker version and login
