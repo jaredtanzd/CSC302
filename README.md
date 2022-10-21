@@ -1,5 +1,4 @@
-# CSC302
-CSC302 Project 
+# CSC302 Project
 
 ## Top-level directory layout
 
