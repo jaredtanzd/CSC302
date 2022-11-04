@@ -2,7 +2,6 @@ import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import plotly.express as px
-
 import numpy as np
 import pandas as pd
 import ssl
@@ -229,11 +228,27 @@ train_r2 = model.score(X_train.values, y_train.values)
 test_rmse = math.sqrt(mean_squared_error(y_test.values, y_test_pred))
 test_r2 = model.score(X_test.values, y_test.values)
 
-
 plot_df_train = pd.concat([y_train, pd.DataFrame(y_train_pred).set_index(y_train.index)], axis=1)
 plot_df_test = pd.concat([y_test, pd.DataFrame(y_test_pred).set_index(y_test.index)], axis=1)
 plot_df_train.columns = ['Gross Actual (Train)', 'Gross Predicted (Train)']
 plot_df_test.columns = ['Gross Actual (Test)', 'Gross Predicted (Test)']
+
+## feature importance
+importances = list(model.feature_importances_)
+attr_importances = [(attr, round(importance, 3)) for attr, importance in zip(X_test.columns, importances)]
+# Sort the feature importances by most important first
+attr_importances = sorted(attr_importances, key = lambda x: x[1], reverse = True)
+sel_features = pd.DataFrame(attr_importances[:5], columns=['Features','Importance'])
+
+X_train = X_train[sel_features.Features.values]
+X_test = X_test[sel_features.Features.values]
+
+model=GradientBoostingRegressor(random_state=0)
+model.fit(X_train.values, y_train.values)
+
+# Predict Gross from our predictor featuresd
+y_train_pred = model.predict(X_train.values)
+y_test_pred = model.predict(X_test.values)
 
 
 fig_main = px.scatter(
@@ -263,6 +278,7 @@ fig_test = px.scatter(
 )
 
 
+ 
 app.layout = html.Div(children=[
     html.H1(children='Movies Data Dashboard', style={'text-align' : 'center', 'font-family':'verdana'}),
     
@@ -284,17 +300,47 @@ app.layout = html.Div(children=[
 
     ## Input movie features 
     html.H3(children='Input your Movie Features!', style={'text-align' : 'center', 'font-family':'verdana'}),
-    html.Div(["Budget: ",dcc.Input(id='budget-input', type='text')],
+    html.Div(["Number of users who voted: ", dcc.Input(id='voted-input', type='text')],
         style={'text-align' : 'center', 'font-family':'verdana'}),
     html.Div(["IMDB Score: ", dcc.Input(id='imdb-input', type='text')],
         style={'text-align' : 'center', 'font-family':'verdana'}),
     html.Div(["Number of critic reviews: ", dcc.Input(id='critic-input', type='text')],
         style={'text-align' : 'center', 'font-family':'verdana'}),
-    html.Div(["Number of users who voted: ", dcc.Input(id='voted-input', type='text')],
+    html.Div(["Budget: ",dcc.Input(id='budget-input', type='text')],
         style={'text-align' : 'center', 'font-family':'verdana'}),
-    html.Div(["Genres: ", dcc.Dropdown(genres, placeholder="Select a genre", id='genres-input')], 
-        style={'width' : '50%', 'font-family':'verdana'})
+    html.Div(["Genres: ", dcc.Dropdown(['Others','Family'], placeholder="Select a genre", id='genres-dropdown')], 
+        style={'align': 'center', 'font-family':'verdana'}),
+    html.Button('Submit', id='submit-button', n_clicks=0),
+    html.H1(id='output-container', style={'text-align': 'center', 'font-family':'verdana'}),
+
 ])
+
+@app.callback(
+    Output(component_id='output-container', component_property='children'),
+    [Input(component_id='submit-button', component_property='n_clicks')],
+    [State(component_id='budget-input', component_property='value')],
+    [State(component_id='imdb-input', component_property='value')],
+    [State(component_id='critic-input', component_property='value')],
+    [State(component_id='voted-input', component_property='value')],
+    [State(component_id='genres-dropdown', component_property='value')],
+    prevent_initial_call = True
+)
+def update(n, budget, imdb, critic, voted, genres):
+    print(n)
+    if n > 0 and int(budget) > 0 and int(imdb) > 0 and int(critic)  > 0 and int(voted) > 0:
+        if  genres ==  'Family':
+            family = 1
+        else:
+            family = 0
+
+        x_new = np.array([voted, budget, critic, family, imdb]).reshape(1, -1)
+        y_new = model.predict(x_new)
+
+        return f'Your gross revenue is {y_new[0]}'
+    
+    else:
+        return 0
+
 
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0", port=8050, debug=True)
