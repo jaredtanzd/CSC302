@@ -1,6 +1,8 @@
 import dash
 from dash import dcc, html
+from dash.dependencies import Input, Output, State
 import plotly.express as px
+
 import numpy as np
 import pandas as pd
 import ssl
@@ -55,7 +57,6 @@ for c in null_features_list:
 # drops all duplicates and updates the dataframe
 df.drop_duplicates(inplace=True) 
 df.reset_index(drop=True, inplace=True)
-
 
 
 ################## FEATURE ENGINEERING ##################
@@ -245,9 +246,6 @@ fig_main = px.scatter(
     log_x=True
 )
 
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-
 fig_train = px.scatter(
     plot_df_train,
     x='Gross Actual (Train)',
@@ -273,16 +271,29 @@ app.layout = html.Div(children=[
         dcc.Graph(id='budget_vs_gross', figure=fig_main, style={'display': 'inline-block', 'height':'80%','width':'80%'})],
         style={'textAlign' : 'center'}),
     
-    html.H3(children='Machine Learning Model Results', style={'text-align' : 'center', 'font-family':'verdana'}),
-    html.Center(children=[dcc.Graph(id="train", style={'display': 'inline-block'}, figure=fig_train),
-        dcc.Graph(id="test", style={'display': 'inline-block'}, figure=fig_test)],
-        style={'textAlign' : 'center'}),
+    html.H3(children='Gradient Boosting Model Results', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.Center(children=[dcc.Graph(id="train", style={'display': 'inline-block'}, figure=fig_train)],style={'textAlign' : 'center'}),
+    html.P(f'Train Set Explained Variance  : {round(train_r2,2)}', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.P(f'Train Set RMSE                : {round(train_rmse,2)}', style={'text-align' : 'center', 'font-family':'verdana'}),
 
-    html.H4(children='Gradient Boosting Results', style={'text-align' : 'center', 'font-family':'verdana'}),
-    html.P(f'Train Set Explained Variance  : {train_r2}', style={'text-align' : 'center', 'font-family':'verdana'}),
-    html.P(f'Train Set RMSE                : {train_rmse}', style={'text-align' : 'center', 'font-family':'verdana'}),
-    html.P(f'Test Set Explained Variance   : {test_r2}', style={'text-align' : 'center', 'font-family':'verdana'}),
-    html.P(f'Test Set RMSE                 : {test_rmse}', style={'text-align' : 'center', 'font-family':'verdana'})
+    html.Center(children=[dcc.Graph(id="test", style={'display': 'inline-block'}, figure=fig_test)],
+        style={'textAlign' : 'center'}),
+    html.P(f'Test Set Explained Variance   : {round(test_r2,2)}', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.P(f'Test Set RMSE                 : {round(test_rmse,2)}', style={'text-align' : 'center', 'font-family':'verdana'}),
+
+
+    ## Input movie features 
+    html.H3(children='Input your Movie Features!', style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.Div(["Budget: ",dcc.Input(id='budget-input', type='text')],
+        style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.Div(["IMDB Score: ", dcc.Input(id='imdb-input', type='text')],
+        style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.Div(["Number of critic reviews: ", dcc.Input(id='critic-input', type='text')],
+        style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.Div(["Number of users who voted: ", dcc.Input(id='voted-input', type='text')],
+        style={'text-align' : 'center', 'font-family':'verdana'}),
+    html.Div(["Genres: ", dcc.Dropdown(genres, placeholder="Select a genre", id='genres-input')], 
+        style={'width' : '50%', 'font-family':'verdana'})
 ])
 
 if __name__ == "__main__":
