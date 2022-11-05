@@ -19,7 +19,8 @@ options = [
 
 for option in options:
     chrome_options.add_argument(option)
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), chrome_options=chrome_options)
+
 driver.get("http://0.0.0.0:8050/")
 element = WebDriverWait(driver, 2).until(
     EC.presence_of_element_located((By.ID, "voted-input"))
