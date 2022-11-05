@@ -21,7 +21,11 @@ jobs:
       run: sudo apt-get install -y chromium-browser
       
     - name: Install Dependencies
-      run: pip install webdriver-manager selenium packaging
+      run: pip install webdriver-manager selenium packaging pandas dash sklearn statsmodels
+
+    - name: Start Web Server
+      run: python src/main.py
+      
     - name: Run Selenium test script
       run: python test.py
       
