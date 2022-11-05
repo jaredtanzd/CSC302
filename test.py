@@ -4,7 +4,21 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 
+chrome_options = Options()
+options = [
+"--headless",
+"--disable-gpu",
+"--window-size=1920,1200",
+"--ignore-certificate-errors",
+"--disable-extensions",
+"--no-sandbox",
+"--disable-dev-shm-usage"
+]
+
+for option in options:
+    chrome_options.add_argument(option)
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 driver.get("http://0.0.0.0:8050/")
 element = WebDriverWait(driver, 2).until(
