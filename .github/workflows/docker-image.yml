@@ -25,6 +25,7 @@ jobs:
 
     - name: Start Web Server
       run: python src/main.py &
+           sleep 20
       
     - name: Run Selenium test script
       run: python test.py
