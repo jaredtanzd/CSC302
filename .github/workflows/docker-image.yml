@@ -24,7 +24,7 @@ jobs:
       run: pip install webdriver-manager selenium packaging pandas dash sklearn statsmodels
 
     - name: Start Web Server
-      run: python src/main.py
+      run: python src/main.py &
       
     - name: Run Selenium test script
       run: python test.py
