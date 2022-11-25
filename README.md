@@ -14,6 +14,7 @@
 - **[Roadmap](docs/Roadmap/)**
 - **[Collected Meeting Notes Folder](docs/Meeting-Notes/)**
 
+![Testing and Docker Workflow](https://github.com/jaredtanzd/CSC302/actions/workflows/docker-image.yml/badge.svg)
 
 ## How to Run
 
