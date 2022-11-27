@@ -15,7 +15,8 @@
 - **[Collected Meeting Notes Folder](docs/Meeting-Notes/)**
 
 ### Testing:
-- Test with python script to check application with dummy inputs
+- Testing is automated with python script to check application with dummy inputs
+- Done every push with github actions
 
 ![Testing and Docker Workflow](https://github.com/jaredtanzd/CSC302/actions/workflows/docker-image.yml/badge.svg)
 
