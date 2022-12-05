@@ -36,7 +36,7 @@
     ```sh
     docker run -p 8050:8050 -d jared2812/csc302:latest
     ```
-5. View Dashboard at http://0.0.0.0:8050/
+5. View Dashboard at http://0.0.0.0:8050/ (Wait for a few minutes for the model to generate the results)
 6. View containers 
     ```sh
     docker ps
